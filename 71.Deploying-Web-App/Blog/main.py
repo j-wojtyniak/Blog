@@ -31,6 +31,7 @@ def admin_only(f):
     return decorated_function
 
 
+# CONFIGURING THE APP
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
 ckeditor = CKEditor(app)
@@ -54,7 +55,7 @@ def load_user(user_id):
     return db.get_or_404(User, user_id)
 
 
-# CREATE DATABASE
+# CREATING DATABASE
 class Base(DeclarativeBase):
     pass
 
@@ -64,7 +65,7 @@ db = SQLAlchemy(model_class=Base)
 db.init_app(app)
 
 
-# CONFIGURE TABLES
+# CONFIGURING TABLES
 class BlogPost(db.Model):
     __tablename__ = "blog_posts"
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
@@ -102,6 +103,7 @@ with app.app_context():
     db.create_all()
 
 
+# REGISTER PAGE
 @app.route('/register', methods=["GET", "POST"])
 def register():
     register_form = RegisterForm()
@@ -122,6 +124,7 @@ def register():
     return render_template("register.html", form=register_form)
 
 
+# LOGIN PAGE
 @app.route('/login', methods=["GET", "POST"])
 def login():
     login_form = LoginForm()
@@ -138,6 +141,7 @@ def login():
     return render_template("login.html", is_logged_in=False, form=login_form)
 
 
+# LOGOUT FUNCTIONALITY
 @app.route('/logout')
 def logout():
     session.pop("is_logged_in", None)
@@ -145,6 +149,7 @@ def logout():
     return redirect(url_for('get_all_posts'))
 
 
+# MAIN PAGE
 @app.route('/')
 def get_all_posts():
     result = db.session.execute(db.select(BlogPost))
@@ -152,6 +157,7 @@ def get_all_posts():
     return render_template("index.html", all_posts=posts)
 
 
+# POST PAGE + COMMENT FUNCTIONALITY
 @app.route("/post/<int:post_id>", methods=["GET", "POST"])
 def show_post(post_id):
     requested_post = db.get_or_404(BlogPost, post_id)
@@ -175,6 +181,7 @@ def show_post(post_id):
                            post=requested_post, form=comment_form, comments=post_comments, is_admin=is_admin)
 
 
+# NEW POST PAGE
 @app.route("/new-post", methods=["GET", "POST"])
 @admin_only
 def add_new_post():
@@ -194,6 +201,7 @@ def add_new_post():
     return render_template("make-post.html", form=form)
 
 
+# EDIT POST PAGE
 @app.route("/edit-post/<int:post_id>", methods=["GET", "POST"])
 @admin_only
 def edit_post(post_id):
@@ -216,6 +224,7 @@ def edit_post(post_id):
     return render_template("make-post.html", form=edit_form, is_edit=True)
 
 
+# DELETE POST FUNCTIONALITY
 @app.route("/delete/<int:post_id>")
 @admin_only
 def delete_post(post_id):
@@ -225,11 +234,13 @@ def delete_post(post_id):
     return redirect(url_for('get_all_posts'))
 
 
+# ABOUT PAGE
 @app.route("/about")
 def about():
     return render_template("about.html")
 
 
+# CONTACT PAGE
 @app.route("/contact")
 def contact():
     return render_template("contact.html")
