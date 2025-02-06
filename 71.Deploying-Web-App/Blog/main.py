@@ -16,6 +16,7 @@ import os
 load_dotenv()
 
 
+# CREATING A DECORATOR FOR FIELDS AVAILABLE FOR ADMIN ONLY
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
